@@ -1,6 +1,5 @@
 import octoprint.plugin
 import flask
-import os
 import octoprint.filemanager.util
 
 
@@ -22,22 +21,19 @@ class TiProjektPlugin(octoprint.plugin.SimpleApiPlugin,
 
         file_path = self._settings.getBaseFolder("base") + "/uploads/" + file_path
 
-        base_name, _ = os.path.splitext(file_path)
-        new_file_path = base_name + ".obj"
 
         info = False
+        text = ""
 
-        with open(new_file_path, "w") as output_file:
-            with open(file_path, "r") as input_file:
-                for line in input_file:
-                    if line.startswith(";obj"):
-                        line = line.replace(";obj", "")
-                        output_file.write(line)
-                        info = True
+        with open(file_path, "r") as input_file:
+            for line in input_file:
+                if line.startswith(";obj"):
+                    line = line.replace(";obj", "")
+                    text = text + line
+                    info = True
 
-        print(new_file_path)
         if info:
-            return flask.send_file(new_file_path)
+            return flask.Response(text, mimetype="text/plain")
         else:
             return flask.jsonify(Error="No obj available")
 
